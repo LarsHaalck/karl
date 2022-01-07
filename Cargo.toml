@@ -1,0 +1,8 @@
+[package]
+name = "karl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0.133", features = ["derive"] }
+structopt = "0.3.25"
