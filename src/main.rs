@@ -1,6 +1,5 @@
 mod clip;
-use clip::Clip;
-
+use clip::{Clip, Clips};
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -10,7 +9,7 @@ enum Karl {
         #[structopt(short, long, help = "Key used for quick access, can be ommited")]
         key: Option<String>,
         #[structopt(help = "Actual data of clipboard entry")]
-        data: String,
+        value: String,
     },
     Clear {
         #[structopt(short, long, help = "Set if only unnamed entries should be cleared")]
@@ -21,5 +20,20 @@ enum Karl {
 
 fn main() {
     let args = Karl::from_args();
-    println!("{:?}", args);
+    match args {
+        Karl::Add { key, value } => {
+            let clips = Clips::read();
+            clips.add(key, Clip(value)).unwrap();
+        }
+        Karl::Clear { unnamed_only } => {}
+        Karl::List => {
+            let clips = Clips::read();
+            clips.named.iter().for_each(|clip| {
+                println!("{:?}, {:?}", clip.0, clip.1);
+            });
+            clips.unnamed.iter().for_each(|clip| {
+                println!("{:?}", clip);
+            });
+        }
+    }
 }
