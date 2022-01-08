@@ -105,7 +105,7 @@ impl Clips {
                 println!("{}:\t{}", clip.0, clip.1.0);
             });
             self.unnamed.iter().for_each(|clip| {
-                println!("\t{}", clip.0);
+                println!("∅:\t{}", clip.0);
             });
         }
         Ok(())
