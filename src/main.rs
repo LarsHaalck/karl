@@ -1,7 +1,13 @@
 mod clip;
-use clip::{Clip, ClipKey, Clips};
+mod clips;
+mod format;
+
+use clip::Clip;
+use clips::{Clips, ClipKey, ClipFormatter};
+use format::{TerminalFormatter, RofiFormatter};
+
 use std::path::PathBuf;
-use structopt::StructOpt;
+use structopt::{clap::ArgGroup, StructOpt};
 use std::fs;
 
 #[derive(StructOpt, Debug)]
@@ -11,21 +17,9 @@ enum KarlArgs {
         #[structopt(short, long, help = "Key used for quick access, can be ommited")]
         key: Option<ClipKey>,
 
-        #[structopt(
-            short,
-            long,
-            help = "Read from file",
-            conflicts_with = "value",
-            required_unless = "value"
-        )]
-        file: Option<Option<PathBuf>>,
 
-        #[structopt(
-            help = "Data of clipboard entry",
-            conflicts_with = "file",
-            required_unless = "file"
-        )]
-        value: Option<String>,
+        #[structopt(flatten)]
+        input: InputArgs,
     },
     Clear {
         #[structopt(short, long, help = "Delete only key", conflicts_with = "unnamed_only")]
@@ -39,15 +33,56 @@ enum KarlArgs {
         unnamed_only: bool,
     },
     List {
+        #[structopt(flatten)]
+        output_type: OutputArgs,
+
         #[structopt(short, long, help = "List only key")]
         key: Option<ClipKey>,
     },
 }
 
+#[derive(StructOpt, Debug)]
+#[structopt(group = ArgGroup::with_name("input").required(true))]
+struct InputArgs {
+    #[structopt(
+        short,
+        long,
+        help = "Read from file",
+        group = "input"
+    )]
+    file: Option<Option<PathBuf>>,
+
+    #[structopt(
+        help = "Data of clipboard entry",
+        group = "input"
+    )]
+    value: Option<String>,
+
+    #[structopt(
+        short,
+        long,
+        help = "Get data from clipboard",
+        group = "input"
+    )]
+    clipboard: bool,
+}
+
+#[derive(StructOpt, Debug)]
+#[structopt(group = ArgGroup::with_name("output_type").required(false))]
+struct OutputArgs {
+    #[structopt(
+        short,
+        long,
+        help = "Rofi output",
+        group = "output_type",
+    )]
+    rofi: bool,
+}
 
 fn handle_args(args: KarlArgs) -> Result<(), String> {
     match args {
-        KarlArgs::Add { key, file, value } => {
+        KarlArgs::Add { key, input } => {
+            let InputArgs { file, value, clipboard } = input;
             let mut clips = Clips::read();
             if let Some(value) = value {
                 clips.add(key, Clip::from(value));
@@ -57,6 +92,8 @@ fn handle_args(args: KarlArgs) -> Result<(), String> {
                     None => Clip::from_file(std::io::stdin()),
                 }?;
                 clips.add(key, clip);
+            } else if clipboard {
+                clips.add(key, Clip::from_clipboard()?);
             }
             clips.write()?;
 
@@ -66,9 +103,14 @@ fn handle_args(args: KarlArgs) -> Result<(), String> {
             clips.clear(key, unnamed_only)?;
             clips.write()?;
         }
-        KarlArgs::List { key } => {
+        KarlArgs::List { key, output_type } => {
             let clips = Clips::read();
-            clips.print(key)?;
+            let OutputArgs { rofi } = output_type;
+            if rofi {
+                RofiFormatter::print(&clips, key)?;
+            } else {
+                TerminalFormatter::print(&clips, key)?;
+            }
         }
     }
     Ok(())
