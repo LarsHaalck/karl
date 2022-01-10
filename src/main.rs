@@ -28,7 +28,6 @@ enum KarlArgs {
             short,
             long,
             help = "Set if only unnamed entries should be cleared",
-            conflicts_with = "key"
         )]
         unnamed_only: bool,
     },

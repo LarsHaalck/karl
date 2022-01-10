@@ -66,9 +66,18 @@ impl Clips {
 
     pub fn clear(&mut self, key: Option<ClipKey>, unnamed_only: bool) -> Result<(), String> {
         if let Some(key) = key {
-            self.named
-                .remove(&key)
-                .ok_or(format!("Key {} did not exist.", key))?;
+            if unnamed_only {
+                let num = key.to_string().parse::<usize>().map_err(|_| "Could not convert into number")?;
+                if num < self.unnamed.len() {
+                    self.unnamed.swap_remove(num);
+                } else {
+                    return Err("Number exceeds number of entries".to_string());
+                }
+            } else {
+                self.named
+                    .remove(&key)
+                    .ok_or(format!("Key {} did not exist.", key))?;
+            }
         } else if unnamed_only {
             self.unnamed.clear();
         } else {
