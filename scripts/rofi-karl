@@ -20,7 +20,7 @@ output=$(echo "${output:1:-1}" | sed 's/\\"/"/g')
 output=$(echo -e "${output}")
 
 if [[ $val -eq 10 ]]; then
-    echo "${output}" | eval "${CLIP_COMMAND}"
+    echo -n "${output}" | eval "${CLIP_COMMAND}"
 else
     xdotool type "${output}"
 fi
