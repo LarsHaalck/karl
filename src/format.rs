@@ -35,13 +35,13 @@ impl ClipFormatter for RofiFormatter {
                 .named
                 .get(&key)
                 .ok_or(format!("Key {} does not exist", key))?;
-            println!("{}:\t{}", key, clip.0);
+            println!("{},{:?}", key, clip.0);
         } else {
             clips.named.iter().for_each(|clip| {
-                println!("{}:\t{}", clip.0, clip.1.0);
+                println!("{},{:?}", clip.0, clip.1.0);
             });
-            clips.unnamed.iter().for_each(|clip| {
-                println!("∅:\t{}", clip.0);
+            clips.unnamed.iter().enumerate().for_each(|(i, clip)| {
+                println!("∅{},{:?}", i, clip.0);
             });
         }
         Ok(())
