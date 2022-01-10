@@ -77,4 +77,8 @@ impl Clips {
         }
         Ok(())
     }
+
+    pub fn print<T: ClipFormatter>(&self, key: Option<ClipKey>, _: T) -> Result<(), String> {
+        T::print(self, key)
+    }
 }

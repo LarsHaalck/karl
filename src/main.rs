@@ -3,7 +3,7 @@ mod clips;
 mod format;
 
 use clip::Clip;
-use clips::{Clips, ClipKey, ClipFormatter};
+use clips::{Clips, ClipKey};
 use format::{TerminalFormatter, RofiFormatter};
 
 use std::path::PathBuf;
@@ -107,9 +107,9 @@ fn handle_args(args: KarlArgs) -> Result<(), String> {
             let clips = Clips::read();
             let OutputArgs { rofi } = output_type;
             if rofi {
-                RofiFormatter::print(&clips, key)?;
+                clips.print(key, RofiFormatter)?;
             } else {
-                TerminalFormatter::print(&clips, key)?;
+                clips.print(key, TerminalFormatter)?;
             }
         }
     }
