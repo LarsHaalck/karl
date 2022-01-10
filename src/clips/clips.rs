@@ -1,4 +1,4 @@
-use crate::clip::Clip;
+use super::clip::Clip;
 
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
@@ -7,16 +7,15 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 
-pub type ClipKey = char;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Clips {
-    pub named: BTreeMap<ClipKey, Clip>,
+    pub named: BTreeMap<char, Clip>,
     pub unnamed: Vec<Clip>,
 }
 
 pub trait ClipFormatter {
-    fn print(clips: &Clips, key: Option<ClipKey>) -> Result<(), String>;
+    fn print(clips: &Clips, key: Option<char>) -> Result<(), String>;
 }
 
 impl Clips {
@@ -54,7 +53,7 @@ impl Clips {
         Ok(())
     }
 
-    pub fn add(&mut self, key: Option<ClipKey>, clip: Clip) {
+    pub fn add(&mut self, key: Option<char>, clip: Clip) {
         if let Some(key) = key {
             self.named.insert(key, clip);
         } else {
@@ -64,7 +63,7 @@ impl Clips {
         }
     }
 
-    pub fn clear(&mut self, key: Option<ClipKey>, unnamed_only: bool) -> Result<(), String> {
+    pub fn clear(&mut self, key: Option<char>, unnamed_only: bool) -> Result<(), String> {
         if let Some(key) = key {
             if unnamed_only {
                 let num = key.to_string().parse::<usize>().map_err(|_| "Could not convert into number")?;
@@ -87,7 +86,7 @@ impl Clips {
         Ok(())
     }
 
-    pub fn print<T: ClipFormatter>(&self, key: Option<ClipKey>, _: T) -> Result<(), String> {
+    pub fn print<T: ClipFormatter>(&self, key: Option<char>, _: T) -> Result<(), String> {
         T::print(self, key)
     }
 }

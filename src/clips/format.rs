@@ -1,9 +1,9 @@
-use crate::clips::{Clips, ClipFormatter, ClipKey};
+use super::clips::{Clips, ClipFormatter};
 
 pub struct TerminalFormatter;
 
 impl ClipFormatter for TerminalFormatter {
-    fn print(clips: &Clips, key: Option<ClipKey>) -> Result<(), String> {
+    fn print(clips: &Clips, key: Option<char>) -> Result<(), String> {
         let line_sep = "-------------------------------------------";
         if let Some(key) = key {
             let clip = clips
@@ -29,7 +29,7 @@ impl ClipFormatter for TerminalFormatter {
 pub struct RofiFormatter;
 
 impl ClipFormatter for RofiFormatter {
-    fn print(clips: &Clips, key: Option<ClipKey>) -> Result<(), String> {
+    fn print(clips: &Clips, key: Option<char>) -> Result<(), String> {
         if let Some(key) = key {
             let clip = clips
                 .named
