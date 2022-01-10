@@ -3,7 +3,7 @@ use crate::clip::Clip;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -11,7 +11,7 @@ pub type ClipKey = char;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Clips {
-    pub named: HashMap<ClipKey, Clip>,
+    pub named: BTreeMap<ClipKey, Clip>,
     pub unnamed: Vec<Clip>,
 }
 
@@ -27,7 +27,7 @@ impl Clips {
 
     pub fn new() -> Clips {
         Clips {
-            named: HashMap::new(),
+            named: BTreeMap::new(),
             unnamed: Vec::new(),
         }
     }
