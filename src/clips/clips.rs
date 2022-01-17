@@ -7,7 +7,6 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Clips {
     pub named: BTreeMap<char, Clip>,
@@ -15,7 +14,7 @@ pub struct Clips {
 }
 
 pub trait ClipFormatter {
-    fn print(clips: &Clips, key: Option<char>) -> Result<(), String>;
+    fn print(clips: &Clips, key: Option<char>, unnamed_only: bool) -> Result<(), String>;
 }
 
 impl Clips {
@@ -63,10 +62,31 @@ impl Clips {
         }
     }
 
+    pub fn get(&self, key: char, unnamed_only: bool) -> Result<&Clip, String> {
+        if unnamed_only {
+            let key = key
+                .to_string()
+                .parse::<usize>()
+                .map_err(|_| "Could not convert key into number")?;
+            Ok(self
+                .unnamed
+                .get(key)
+                .ok_or(format!("Key {} does not exist", key))?)
+        } else {
+            Ok(self
+                .named
+                .get(&key)
+                .ok_or(format!("Key {} does not exist", key))?)
+        }
+    }
+
     pub fn clear(&mut self, key: Option<char>, unnamed_only: bool) -> Result<(), String> {
         if let Some(key) = key {
             if unnamed_only {
-                let num = key.to_string().parse::<usize>().map_err(|_| "Could not convert into number")?;
+                let num = key
+                    .to_string()
+                    .parse::<usize>()
+                    .map_err(|_| "Could not convert into number")?;
                 if num < self.unnamed.len() {
                     self.unnamed.swap_remove(num);
                 } else {
@@ -86,7 +106,12 @@ impl Clips {
         Ok(())
     }
 
-    pub fn print<T: ClipFormatter>(&self, key: Option<char>, _: T) -> Result<(), String> {
-        T::print(self, key)
+    pub fn print<T: ClipFormatter>(
+        &self,
+        key: Option<char>,
+        unnamed_only: bool,
+        _: T,
+    ) -> Result<(), String> {
+        T::print(self, key, unnamed_only)
     }
 }

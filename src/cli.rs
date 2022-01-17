@@ -23,11 +23,17 @@ pub enum KarlArgs {
         unnamed_only: bool,
     },
     List {
-        #[structopt(flatten)]
-        output_type: OutputArgs,
-
         #[structopt(short, long, help = "List only key")]
         key: Option<char>,
+        #[structopt(
+            short,
+            long,
+            help = "Set if only unnamed entries should be listed",
+        )]
+        unnamed_only: bool,
+
+        #[structopt(flatten)]
+        output_type: OutputArgs,
     },
 }
 
@@ -63,8 +69,15 @@ pub struct OutputArgs {
     #[structopt(
         short,
         long,
-        help = "Rofi output",
+        help = "Raw output",
         group = "output_type",
     )]
-    pub rofi: bool,
+    pub raw: bool,
+    #[structopt(
+        short,
+        long,
+        help = "Linewise output",
+        group = "output_type",
+    )]
+    pub line: bool,
 }

@@ -3,7 +3,7 @@ mod clips;
 
 use cli::{InputArgs, KarlArgs, OutputArgs};
 use clips::{
-    format::{RofiFormatter, TerminalFormatter},
+    format::{TerminalFormatter, RawFormatter, LineFormatter},
     Clip, Clips,
 };
 use structopt::StructOpt;
@@ -37,22 +37,22 @@ fn handle_args(args: KarlArgs) -> Result<(), String> {
             clips.clear(key, unnamed_only)?;
             clips.write()?;
         }
-        KarlArgs::List { key, output_type } => {
+        KarlArgs::List { key, unnamed_only, output_type } => {
             let clips = Clips::read();
-            let OutputArgs { rofi } = output_type;
-            if rofi {
-                clips.print(key, RofiFormatter)?;
+            let OutputArgs { raw, line } = output_type;
+            if raw {
+                clips.print(key, unnamed_only, RawFormatter)?;
+            } else if line {
+                clips.print(key, unnamed_only, LineFormatter)?;
             } else {
-                clips.print(key, TerminalFormatter)?;
+                clips.print(key, unnamed_only, TerminalFormatter)?;
             }
         }
     }
     Ok(())
 }
 
-fn main() {
+fn main() -> Result<(), String> {
     let args = KarlArgs::from_args();
-    if let Err(e) = handle_args(args) {
-        eprintln!("Error: {}", e);
-    }
+    handle_args(args)
 }
